@@ -160,3 +160,6 @@ public class RunnerTest {
 ![maven test again](images/img_7.png)
 
 مشاهده می‌شود تمام تست‌ها با موفقیت اجرا شده‌اند.
+
+
+حال در ادامه سناریوهای مرتبط با فیچر `multiply` و `Subtraction` را اضافه می‌کنیم:
