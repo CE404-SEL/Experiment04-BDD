@@ -160,3 +160,123 @@ public class RunnerTest {
 ![maven test again](images/img_7.png)
 
 مشاهده می‌شود تمام تست‌ها با موفقیت اجرا شده‌اند.
+
+
+حال در ادامه سناریوهای مرتبط با فیچر `division` و `Subtraction` را اضافه می‌کنیم:
+
+
+```gherkin
+Scenario Outline: Subtraction operation
+Given a calculator
+When I subtract <second_operand> from <first_operand>
+Then the result should be <expected_result>
+
+Examples:
+    | first_operand | second_operand | expected_result |
+    | 8.0           | 3.0            | 5.0             |
+    | 4.7           | 2.5            | 2.2             |
+    | 0.0           | 0.0            | 0.0             |
+    | -5.0          | -10.0          | 5.0             |
+    | 200.3         | 100.5          | 99.8            |
+
+Scenario Outline: Division operation
+Given a calculator
+When I divide <first_operand> by <second_operand>
+Then the result should be <expected_result>
+
+Examples:
+    | first_operand | second_operand | expected_result |
+    | 15.0          | 3.0            | 5.0             |
+    | 10.0          | 2.0            | 5.0             |
+    | 0.0           | 5.0            | 0.0             |
+    | -8.0          | 2.0            | -4.0            |
+    | 7.5           | 2.5            | 3.0             |
+
+Scenario Outline: Division by zero
+Given a calculator
+When I divide <first_operand> by zero
+Then the operation should fail with error message
+
+Examples:
+    | first_operand |
+    | 10.0          |
+    | -5.0          |
+    | 0.0           |
+```
+
+در ادامه قسمت **Step Definitions** را پیاده‌سازی می‌کنیم تا این سناریوها را اجرا کنیم:
+
+```java
+@When("I subtract {double} from {double}")
+public void iSubtractFrom(double secondOperand, double firstOperand) {
+    result = calculator.subtract(firstOperand, secondOperand);
+}
+
+@When("I divide {double} by {double}")
+public void iDivideBy(double firstOperand, double secondOperand) {
+    try {
+        result = calculator.divide(firstOperand, secondOperand);
+    } catch (Exception e) {
+        exception = e;
+    }
+}
+
+@When("I divide {double} by zero")
+public void iDivideByZero(double firstOperand) {
+    try {
+        result = calculator.divide(firstOperand, 0.0);
+    } catch (Exception e) {
+        exception = e;
+    }
+}
+
+@Then("the result should be {double}")
+public void theResultShouldBe(double expectedResult) {
+    assertEquals(expectedResult, result, 0.01);
+}
+
+@Then("the operation should fail with error message")
+public void theOperationShouldFailWithErrorMessage() {
+    if (exception == null) {
+        fail("Expected an exception to be thrown for division by zero");
+    }
+}
+```
+
+حال اگر تست‌ها را اجرا کنیم می‌بینیم که پاس نمی‌شوند، چرا که هنوز متدهای مورد نظر را در کلاس `Calculator` اضافه نکرده‌ایم. 
+
+در ادامه این متد‌ها را به کلاس `Calculator`
+اضافه می‌کنیم:
+
+```java
+public class Calculator {
+    
+    public double add(double firstOperand, double secondOperand) {
+        return firstOperand + secondOperand;
+    }
+    
+    public double multiply(double firstOperand, double secondOperand) {
+        return firstOperand * secondOperand;
+    }
+    
+    public double subtract(double firstOperand, double secondOperand) {
+        return firstOperand - secondOperand;
+    }
+    
+    public double divide(double firstOperand, double secondOperand) {
+        if (secondOperand == 0.0) {
+            throw new ArithmeticException("Division by zero is not allowed");
+        }
+        return firstOperand / secondOperand;
+    }
+}
+```
+
+حال تست‌های فیچر `Calculator operations`
+را اجرا می‌کنیم و می‌بینیم که همگی پاس می‌شوند:
+
+![run feature tests pass](/images/image.png)
+
+این بار با استفاده از `maven test` پروژه را بیلد و تست می‌کنیم:
+
+![maven test](/images/image-1.png)
